@@ -37,6 +37,8 @@ static int leakyAllocate(void* data, uint_t line, char* file, uint_t size);
 static int leakyDeallocate(void* data);
 
 void* leakyMalloc(uint_t line, char* file, int Size);
+void* leakyCalloc(uint_t line, char* file, int NumOfElements, int SizeOfElements);
+// void* leakyRealloc(uint_t line, char* file, void* Memory, int NewSize);
 void leakyFree(void* Memory);
 
 void leakyRaport();
@@ -117,6 +119,43 @@ void* leakyMalloc(uint_t line, char* file, int Size){
     return data;
 }
 
+void* leakyCalloc(uint_t line, char* file, int NumOfElements, int SizeOfElements) {
+    if(initialized == 0){
+        leakyInit();
+    }
+
+    void* data = calloc(NumOfElements, SizeOfElements);
+    if(!data) {
+        perror("[ERR]");
+        return NULL;
+    }
+
+    leakyAllocate(data, line, file, NumOfElements * SizeOfElements);
+
+    return data;
+}
+
+/* TODO: fix this
+
+void* leakyRealloc(uint_t line, char* file, void* Memory, int NewSize) {
+    if(initialized == 0){
+        leakyInit();
+    }
+
+    void* newData = realloc(Memory, NewSize);
+    if(!newData) {
+        perror("[ERR]");
+        return NULL;
+    }
+
+    leakyFree(Memory);
+    leakyAllocate(newData, line, file, NewSize);
+
+    return newData;
+}
+
+*/
+
 void leakyFree(void* Memory){
     if(initialized == 0){
         leakyInit();
@@ -159,6 +198,8 @@ void leakyRaport(){
 }
 
 #define malloc(Size) leakyMalloc(__LINE__, __FILE__, Size) 
+#define calloc(NumOfElements, SizeOfElements) leakyCalloc(__LINE__, __FILE__, SizeOfElements, NumOfElements)
+// define realloc(Memory, NewSize) leakyRealloc(__LINE__, __FILE__, Memory, NewSize) TODO: implement the 'realloc' so that it won't cause any segmentation problems
 #define free(Memory) leakyFree(Memory) 
 
 #endif // LEAKY_IMPLEMENTATION
