@@ -32,16 +32,22 @@ static struct {
     uint_t current;
 } memoryData;
 
+/*
+
+NOTE: if this change will cause the bad and unexpected behaviours, then I'll revert the commenting of these declarations. For now, there'll only be the definitions of the functions left in the implementation section
+
 static void leakyInit();
 static int leakyAllocate(void* data, uint_t line, char* file, uint_t size);
 static int leakyDeallocate(void* data);
 
 void* leakyMalloc(uint_t line, char* file, int Size);
 void* leakyCalloc(uint_t line, char* file, int NumOfElements, int SizeOfElements);
-// void* leakyRealloc(uint_t line, char* file, void* Memory, int NewSize);
+void* leakyRealloc(uint_t line, char* file, void* Memory, int NewSize);
 void leakyFree(void* Memory);
 
 void leakyRaport();
+
+*/
 
 #ifdef LEAKY_IMPLEMENTATION
 
@@ -50,6 +56,34 @@ void leakyRaport();
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+
+void leakyRaport(){
+    printf("+----------------------------------+\n");
+    printf("|       LEAKY GENERAL RAPORT       |\n");
+    printf("+----------------------------------+\n");
+    printf("> Total 'allocation' calls: %i calls\n", memoryData.allocationsCallsTotal);
+    printf("> Total 'free' calls:       %i calls\n", memoryData.freeCallsTotal);
+    printf("> Memory allocated:         %i bytes\n", memoryData.allocationsTotalSize);
+    printf("> Memory freed:             %i bytes\n", memoryData.freeTotalSize);
+    printf("+----------------------------------+\n\n");
+
+    if(memoryData.allocationsCallsTotal == memoryData.freeCallsTotal) {
+        return;
+    }
+
+    printf("+-----------------------------------+\n");
+    printf("|       LEAKY DETAILED RAPORT       |\n");
+    printf("+-----------------------------------+\n");
+
+    for(int i = 0; i < ALLOCATION_SIZE_MAX; i++) {
+        if(memoryData.allocationData[i].allocationAddress != NULL) {
+            printf("> Memory leak at: %s:%i (size: %i bytes)\n", memoryData.allocationData[i].allocationFile, memoryData.allocationData[i].allocationLine, memoryData.allocationData[i].allocationSize);
+        }
+    }
+
+    printf("+-----------------------------------+\n\n");
+
+}
 
 static void leakyInit(){
     if(initialized == 0) {
@@ -103,6 +137,19 @@ static int leakyDeallocate(void *data){
     return -1;
 }
 
+void leakyFree(void* Memory){
+    if(initialized == 0){
+        leakyInit();
+    }
+
+    if(!Memory){
+        return;
+    }
+
+    leakyDeallocate(Memory);
+    free(Memory);
+}
+
 void* leakyMalloc(uint_t line, char* file, int Size){
     if(initialized == 0){
         leakyInit();
@@ -135,8 +182,6 @@ void* leakyCalloc(uint_t line, char* file, int NumOfElements, int SizeOfElements
     return data;
 }
 
-/* TODO: fix this
-
 void* leakyRealloc(uint_t line, char* file, void* Memory, int NewSize) {
     if(initialized == 0){
         leakyInit();
@@ -154,52 +199,10 @@ void* leakyRealloc(uint_t line, char* file, void* Memory, int NewSize) {
     return newData;
 }
 
-*/
-
-void leakyFree(void* Memory){
-    if(initialized == 0){
-        leakyInit();
-    }
-
-    if(!Memory){
-        return;
-    }
-
-    leakyDeallocate(Memory);
-    free(Memory);
-}
-
-void leakyRaport(){
-    printf("+----------------------------------+\n");
-    printf("|       LEAKY GENERAL RAPORT       |\n");
-    printf("+----------------------------------+\n");
-    printf("> Total 'allocation' calls: %i calls\n", memoryData.allocationsCallsTotal);
-    printf("> Total 'free' calls:       %i calls\n", memoryData.freeCallsTotal);
-    printf("> Memory allocated:         %i bytes\n", memoryData.allocationsTotalSize);
-    printf("> Memory freed:             %i bytes\n", memoryData.freeTotalSize);
-    printf("+----------------------------------+\n\n");
-
-    if(memoryData.allocationsCallsTotal == memoryData.freeCallsTotal) {
-        return;
-    }
-
-    printf("+-----------------------------------+\n");
-    printf("|       LEAKY DETAILED RAPORT       |\n");
-    printf("+-----------------------------------+\n");
-
-    for(int i = 0; i < ALLOCATION_SIZE_MAX; i++) {
-        if(memoryData.allocationData[i].allocationAddress != NULL) {
-            printf("> Memory leak at: %s:%i (size: %i bytes)\n", memoryData.allocationData[i].allocationFile, memoryData.allocationData[i].allocationLine, memoryData.allocationData[i].allocationSize);
-        }
-    }
-
-    printf("+-----------------------------------+\n\n");
-
-}
 
 #define malloc(Size) leakyMalloc(__LINE__, __FILE__, Size) 
 #define calloc(NumOfElements, SizeOfElements) leakyCalloc(__LINE__, __FILE__, SizeOfElements, NumOfElements)
-// define realloc(Memory, NewSize) leakyRealloc(__LINE__, __FILE__, Memory, NewSize) TODO: implement the 'realloc' so that it won't cause any segmentation problems
+#define realloc(Memory, NewSize) leakyRealloc(__LINE__, __FILE__, Memory, NewSize)
 #define free(Memory) leakyFree(Memory) 
 
 #endif // LEAKY_IMPLEMENTATION
