@@ -37,12 +37,14 @@ int main(void){
 ```
 
 # Description
-Leaky is a C / C++ single-header library for menaging the memory of the program. It isn't implementing any idioms to make working with memory simpler (like for example, RAII idiom). It keeps track of allocating and freeing the memory, how much memory was allocated, freed and lost, and where the potential memory laks happend. The project was heavily inspired by the <b>`namantam1/memory-leak-detector`</b>: most of the original code was taken and redefined in the way that I think would work better and make the codebase cleaner and simpler. All the credits goes to this guy! 
+Leaky is a lightweight C/C++ single-header library designed for memory management in your programs. Unlike some libraries that introduce complex memory management idioms (e.g., RAII), Leaky takes a more straightforward approach. It diligently tracks memory allocation and deallocation, monitors memory consumption, and helps you identify potential memory leaks in your code.
 
-# Informations
-- <b>Original author:</b> This project was inspired by the [namantam1](https://github.com/namantam1). The repository used heavily in this project is [here](https://github.com/namantam1/memory-leak-detector).
-- <b>Single-Header:</b> Leaky is a `single-header library`, so to make it work in your project you just need to drag-and-drop the `leaky.h` file.
-- <b>#LEAKY_IMPLEMENTATION:</b> to make the Leaky work, you need to define the makro `LEAKY_IMPLEMENTATION` somewhere in your source files. It'll include the definitions of the functions used by Leaky. <b>THIS MAKRO MUST BE DEFINED ONLY ONCE. MULTIPLE DEFINITIONS OF THE `LEAKY_IMPLEMENTATION` WILL CAUSE THE PROBLEMS!</b>
+This project draws significant inspiration from [namantam1's memory-leak-detector](https://github.com/namantam1/memory-leak-detector). While the original code served as a foundation, it has been redefined and refined to improve functionality, codebase cleanliness, and simplicity. Credit goes to the original author for their valuable work.
+
+# Information
+- **Original Author:** Leaky was inspired by the work of [namantam1](https://github.com/namantam1), and it leverages their repository, which can be found [here](https://github.com/namantam1/memory-leak-detector).
+- **Single-Header:** Leaky is designed as a `single-header library`, which means you can effortlessly integrate it into your project by simply including the `leaky.h` file.
+- **#LEAKY_IMPLEMENTATION:** To make Leaky functional in your project, you need to define the `LEAKY_IMPLEMENTATION` macro once within your source files. This macro includes the necessary function definitions used by Leaky. **Please note that defining `LEAKY_IMPLEMENTATION` multiple times can lead to issues, so ensure it's defined only once.**
 
 # TODO:
 - [X] implement `realloc`.
