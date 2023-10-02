@@ -9,11 +9,11 @@
 #include "leaky.h"
 
 int main(void){
-    // This will cause a memory leak of size: 4 bytes
+    // This will cause a memory leak of size: sizeof(int) bytes
     int* integer = malloc(sizeof(int));
     *integer = 8;
 
-    // This will cause a memory leak of size: 4 * 2 bytes...
+    // This will cause a memory leak of size: 2 * sizeof(float) bytes...
     float* floatingValue = calloc(sizeof(float), 2);
     floatingValue[0] = 3.14159f;
     floatingValue[1] = 0.123f;
@@ -21,16 +21,16 @@ int main(void){
     // ..unless You call the free() function!
     free(floatingValue);
 
-    // This will cause a memory leak of size: 8 * 1 bytes
+    // This call is allocating the memory of size: 8 * sizeof(char) bytes...
     char* sentance = malloc(8 * sizeof(char));
-    sentance = "Hello, world!";
+
+    // ...which is the reallocated with the size: 16 * sizeof(char). The reallocation will cause a memory leak, bacause the previous char* was freed during the process
+    char* newSentance = realloc(sentance, 16 * sizeof(char));
 
     // At the end of the program we have two memory leaks:
     //      > 1. *integer at line 8;
-    //      > 2. *sentance at line 20;
-    // Leaky will keep track of those values and, at the end of the program,
-    // it's going to give you a raport of every allocation, every freeing,
-    // how much memory you've allocated and freed and which variables cause the leaks!
+    //      > 2. *newSentance at line 23;
+    // Leaky will keep track of those values and, at the end of the program, it's going to give you a raport of every allocation, every freeing, how much memory you've allocated and freed and which variables cause the leaks!
 
     return 0;
 }
@@ -45,7 +45,7 @@ Leaky is a C / C++ single-header library for menaging the memory of the program.
 - <b>#LEAKY_IMPLEMENTATION:</b> to make the Leaky work, you need to define the makro `LEAKY_IMPLEMENTATION` somewhere in your source files. It'll include the definitions of the functions used by Leaky. <b>THIS MAKRO MUST BE DEFINED ONLY ONCE. MULTIPLE DEFINITIONS OF THE `LEAKY_IMPLEMENTATION` WILL CAUSE THE PROBLEMS!</b>
 
 # TODO:
-- [ ] implement `realloc`.
+- [X] implement `realloc`.
 - [ ] comment the codebase of the `leaky.h` file.
 - [ ] write better example code.
 - [ ] write tests.
